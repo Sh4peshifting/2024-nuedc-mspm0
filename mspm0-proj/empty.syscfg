@@ -17,6 +17,9 @@ const TIMER1 = TIMER.addInstance();
 /**
  * Write custom configuration values to the imported modules.
  */
+const divider6       = system.clockTree["PLL_CLK2X_DIV"];
+divider6.divideValue = 4;
+
 const divider9       = system.clockTree["UDIV"];
 divider9.divideValue = 2;
 
@@ -27,14 +30,19 @@ const mux4       = system.clockTree["EXHFMUX"];
 mux4.inputSelect = "EXHFMUX_XTAL";
 
 const mux8       = system.clockTree["HSCLKMUX"];
-mux8.inputSelect = "HSCLKMUX_SYSPLL0";
+mux8.inputSelect = "HSCLKMUX_SYSPLL2X";
 
 const mux12       = system.clockTree["SYSPLLMUX"];
 mux12.inputSelect = "zSYSPLLMUX_HFCLK";
 
-const pinFunction4     = system.clockTree["HFXT"];
-pinFunction4.inputFreq = 40;
-pinFunction4.enable    = true;
+const pinFunction3     = system.clockTree["HFCLKEXT"];
+pinFunction3.inputFreq = 40;
+
+const pinFunction4        = system.clockTree["HFXT"];
+pinFunction4.inputFreq    = 40;
+pinFunction4.HFCLKMonitor = true;
+pinFunction4.enable       = true;
+pinFunction4.HFXTStartup  = 5;
 
 GPIO1.$name                         = "GPIO_LEDS";
 GPIO1.port                          = "PORTB";
@@ -50,8 +58,19 @@ const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
+SYSCTL.validateClkStatus     = true;
+SYSCTL.useHFCLK_Manual       = true;
+SYSCTL.HFCLKSource           = "HFXT";
+SYSCTL.HFCLKMonitor          = true;
+SYSCTL.HFXTStartup           = 1;
 
-TIMER1.$name = "TIMER_0";
+TIMER1.$name               = "TIMER_0";
+TIMER1.timerMode           = "PERIODIC";
+TIMER1.interrupts          = ["REPC"];
+TIMER1.enableRepeatCounter = true;
+TIMER1.timerPeriod         = "200 ms";
+TIMER1.timerClkSrc         = "LFCLK";
+TIMER1.repeatCounter       = 4;
 
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future

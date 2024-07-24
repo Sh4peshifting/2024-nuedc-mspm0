@@ -53,6 +53,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     /* Module-Specific Initializations*/
     SYSCFG_DL_SYSCTL_init();
     SYSCFG_DL_TIMER_0_init();
+    SYSCFG_DL_SYSCTL_CLK_init();
     /* Ensure backup structures have no valid state */
 	gTIMER_0Backup.backupRdy 	= false;
 
@@ -116,13 +117,13 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 
 static const DL_SYSCTL_SYSPLLConfig gSYSPLLConfig = {
     .inputFreq              = DL_SYSCTL_SYSPLL_INPUT_FREQ_32_48_MHZ,
-	.rDivClk2x              = 1,
+	.rDivClk2x              = 3,
 	.rDivClk1               = 0,
 	.rDivClk0               = 0,
-	.enableCLK2x            = DL_SYSCTL_SYSPLL_CLK2X_DISABLE,
+	.enableCLK2x            = DL_SYSCTL_SYSPLL_CLK2X_ENABLE,
 	.enableCLK1             = DL_SYSCTL_SYSPLL_CLK1_DISABLE,
-	.enableCLK0             = DL_SYSCTL_SYSPLL_CLK0_ENABLE,
-	.sysPLLMCLK             = DL_SYSCTL_SYSPLL_MCLK_CLK0,
+	.enableCLK0             = DL_SYSCTL_SYSPLL_CLK0_DISABLE,
+	.sysPLLMCLK             = DL_SYSCTL_SYSPLL_MCLK_CLK2X,
 	.sysPLLRef              = DL_SYSCTL_SYSPLL_REF_HFCLK,
 	.qDiv                   = 3,
 	.pDiv                   = DL_SYSCTL_SYSPLL_PDIV_1
@@ -139,33 +140,50 @@ SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
 	/* Set default configuration */
 	DL_SYSCTL_disableHFXT();
 	DL_SYSCTL_disableSYSPLL();
-    DL_SYSCTL_setHFCLKSourceHFXTParams(DL_SYSCTL_HFXT_RANGE_32_48_MHZ,0, false);
+    DL_SYSCTL_setHFCLKSourceHFXTParams(DL_SYSCTL_HFXT_RANGE_32_48_MHZ,5, true);
     DL_SYSCTL_configSYSPLL((DL_SYSCTL_SYSPLLConfig *) &gSYSPLLConfig);
     DL_SYSCTL_setULPCLKDivider(DL_SYSCTL_ULPCLK_DIV_2);
     DL_SYSCTL_setMCLKSource(SYSOSC, HSCLK, DL_SYSCTL_HSCLK_SOURCE_SYSPLL);
 
 }
+SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_CLK_init(void) {
+    while ((DL_SYSCTL_getClockStatus() & (DL_SYSCTL_CLK_STATUS_SYSPLL_GOOD
+		 | DL_SYSCTL_CLK_STATUS_HFCLK_GOOD
+		 | DL_SYSCTL_CLK_STATUS_HSCLK_GOOD
+		 | DL_SYSCTL_CLK_STATUS_LFOSC_GOOD))
+	       != (DL_SYSCTL_CLK_STATUS_SYSPLL_GOOD
+		 | DL_SYSCTL_CLK_STATUS_HFCLK_GOOD
+		 | DL_SYSCTL_CLK_STATUS_HSCLK_GOOD
+		 | DL_SYSCTL_CLK_STATUS_LFOSC_GOOD))
+	{
+		/* Ensure that clocks are in default POR configuration before initialization.
+		* Additionally once LFXT is enabled, the internal LFOSC is disabled, and cannot
+		* be re-enabled other than by executing a BOOTRST. */
+		;
+	}
+}
+
 
 
 
 /*
- * Timer clock configuration to be sourced by BUSCLK /  (80000000 Hz)
+ * Timer clock configuration to be sourced by LFCLK /  (32768 Hz)
  * timerClkFreq = (timerClkSrc / (timerClkDivRatio * (timerClkPrescale + 1)))
- *   80000000 Hz = 80000000 Hz / (1 * (0 + 1))
+ *   32768 Hz = 32768 Hz / (1 * (0 + 1))
  */
 static const DL_TimerA_ClockConfig gTIMER_0ClockConfig = {
-    .clockSel    = DL_TIMER_CLOCK_BUSCLK,
+    .clockSel    = DL_TIMER_CLOCK_LFCLK,
     .divideRatio = DL_TIMER_CLOCK_DIVIDE_1,
     .prescale    = 0U,
 };
 
 /*
  * Timer load value (where the counter starts from) is calculated as (timerPeriod * timerClockFreq) - 1
- * TIMER_0_INST_LOAD_VALUE = (0 ms * 80000000 Hz) - 1
+ * TIMER_0_INST_LOAD_VALUE = (200 ms * 32768 Hz) - 1
  */
 static const DL_TimerA_TimerConfig gTIMER_0TimerConfig = {
     .period     = TIMER_0_INST_LOAD_VALUE,
-    .timerMode  = DL_TIMER_TIMER_MODE_ONE_SHOT,
+    .timerMode  = DL_TIMER_TIMER_MODE_PERIODIC,
     .startTimer = DL_TIMER_STOP,
 };
 
@@ -176,6 +194,9 @@ SYSCONFIG_WEAK void SYSCFG_DL_TIMER_0_init(void) {
 
     DL_TimerA_initTimerMode(TIMER_0_INST,
         (DL_TimerA_TimerConfig *) &gTIMER_0TimerConfig);
+    DL_TimerA_enableInterrupt(TIMER_0_INST , DL_TIMERA_INTERRUPT_REPC_EVENT);
+    DL_TimerA_setRepeatCounter(TIMER_0_INST, TIMER_0_REPEAT_COUNT_4);
+
     DL_TimerA_enableClock(TIMER_0_INST);
 
 
