@@ -10,7 +10,6 @@
 *.lst
 *.ini
 *.iex
-*.sct
 *.scvd
 *.uvguix
 *.dbg*
