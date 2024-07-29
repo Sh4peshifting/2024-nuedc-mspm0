@@ -95,6 +95,7 @@ TIMER1.timerMode                   = "PERIODIC";
 TIMER1.event1PublisherChannel      = 12;
 TIMER1.event1ControllerInterruptEn = ["ZERO_EVENT"];
 TIMER1.timerPeriod                 = "100 us";
+TIMER1.interrupts                  = ["ZERO"];
 TIMER1.peripheral.$assign          = "TIMG0";
 
 ProjectConfig.genLibCMSIS = true;
