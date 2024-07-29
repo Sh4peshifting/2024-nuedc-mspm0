@@ -1,0 +1,9 @@
+.settings/
+Debug/
+targetConfigs/
+
+*.ccsproject
+*.clangd
+*.project
+
+*.html

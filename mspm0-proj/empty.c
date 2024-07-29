@@ -31,38 +31,16 @@
  */
 
 #include "ti_msp_dl_config.h"
+#include "dsp.h"
 
 int main(void)
 {
     SYSCFG_DL_init();
-
-    DL_GPIO_clearPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_2_PIN);
-    DL_GPIO_setPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN |
-                                        GPIO_LEDS_USER_LED_3_PIN);
-	
-//		NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
-//    DL_SYSCTL_enableSleepOnExit();
-
-//    DL_TimerA_startCounter(TIMER_0_INST);
+    
+    adc_dma_init();
+    DL_TimerG_startCounter(TIMER_0_INST);
 
     while (1) {
-         __WFI();
-//    delay_cycles(40000000);
-//            DL_GPIO_togglePins(GPIO_LEDS_PORT,
-//            GPIO_LEDS_USER_LED_1_PIN | GPIO_LEDS_USER_LED_2_PIN |
-//                GPIO_LEDS_USER_LED_3_PIN);
+        __WFE();
     }
-}
-
-void TIMER_0_INST_IRQHandler(void)
-{
-   switch (DL_TimerA_getPendingInterrupt(TIMER_0_INST)) {
-       case DL_TIMERA_IIDX_REPEAT_COUNT:
-        DL_GPIO_togglePins(GPIO_LEDS_PORT,
-            GPIO_LEDS_USER_LED_1_PIN | GPIO_LEDS_USER_LED_2_PIN |
-                GPIO_LEDS_USER_LED_3_PIN);
-           break;
-       default:
-           break;
-   }
 }
