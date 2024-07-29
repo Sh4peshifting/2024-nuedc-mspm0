@@ -5,5 +5,6 @@ targetConfigs/
 *.ccsproject
 *.clangd
 *.project
+*.cproject
 
 *.html
