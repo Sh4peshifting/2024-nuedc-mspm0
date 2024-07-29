@@ -31,13 +31,17 @@
  */
 
 #include "ti_msp_dl_config.h"
-#include "dsp.h"
+#include "adc_data_conv.h"
+#include "fft.h"
+#include "timer.h"
 
 int main(void)
 {
     SYSCFG_DL_init();
     
     adc_dma_init();
+    NVIC_EnableIRQ(COMP_0_INST_INT_IRQN);
+
     DL_TimerG_startCounter(TIMER_0_INST);
 
     while (1) {
