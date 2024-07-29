@@ -35,16 +35,17 @@
 #include "fft.h"
 #include "timer.h"
 
+
 int main(void)
 {
     SYSCFG_DL_init();
-    
+    DL_SYSCTL_setPowerPolicyRUN0SLEEP0();
+
     adc_dma_init();
     NVIC_EnableIRQ(COMP_0_INST_INT_IRQN);
 
-    DL_TimerG_startCounter(TIMER_0_INST);
-
     while (1) {
-        __WFE();
+        adc_data_opt();
+        __BKPT(0);
     }
 }
