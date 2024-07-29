@@ -1,4 +1,4 @@
-#include "dsp.h"
+#include "adc_data_conv.h"
 
 // use `DL_TimerG_startCounter(TIMER_0_INST);` to start adc
 
@@ -18,6 +18,12 @@ float curr_real_calc_inx;
 float curr_img;
 float curr_img_calc_inx;
 
+uint16_t volt_edge_rec;
+uint16_t volt_edge_inx[50];
+uint8_t volt_edge_flag = 0;
+
+float volt_rms;
+
 void adc_dma_init()
 {
      DL_DMA_setSrcAddr(DMA, DMA_CH0_CHAN_ID,
@@ -36,19 +42,14 @@ void adc_dma_init()
     NVIC_EnableIRQ(ADC12_1_INST_INT_IRQN);
 }
 
-void fft_proc()
+float circuit_param_calc(float* param_input,uint16_t start_inx, uint16_t end_inx)
 {
-    
-}
-
-float curr_param_calc(float* curr,uint16_t start_inx, uint16_t end_inx)
-{
-    float curr_param = 0;
+    float circuit_param = 0;
     for (uint16_t i = start_inx; i < end_inx; i++) {
-        curr_param += curr[i];
+        circuit_param += param_input[i];
     }
-    curr_param = curr_param / (end_inx - start_inx + 1);
-    return curr_param;
+    circuit_param = circuit_param / (end_inx - start_inx + 1);
+    return circuit_param;
 }
 
 void find_positive_half_cycles(float* signal, uint16_t size) {
@@ -66,14 +67,14 @@ void find_positive_half_cycles(float* signal, uint16_t size) {
             in_positive_half_cycle = 1;
         } else if (signal[i] <= 0 && signal[i - 1] > 0 && in_positive_half_cycle) {
             pos_end = i - 1; 
-            curr_real += curr_param_calc(curr ,pos_start, pos_end);
+            curr_real += circuit_param_calc(curr ,pos_start, pos_end);
             curr_real_calc_inx++;
             in_positive_half_cycle = 0;
             half_pos_cycle = (pos_end - pos_start) / 2;
             nege_start = pos_start + half_pos_cycle;
             nege_end = pos_end + half_pos_cycle;
             if (nege_end < RESULT_SIZE){
-                curr_img += curr_param_calc(curr, nege_start, nege_end);
+                curr_img += circuit_param_calc(curr, nege_start, nege_end);
                 curr_img_calc_inx++;
             }
         }
@@ -94,7 +95,21 @@ void adc_data_proc()
     // curr_img = curr_img / curr_img_calc_inx;
 }
 
-
+void volt_rms_calc()
+{
+    if (adc_done == 0x03) {
+        for (uint16_t i = 0; i < volt_edge_rec; i++) {
+            if (volt[volt_edge_inx[i]] < 0) {
+                volt_rms -= volt[volt_edge_inx[i]];
+            }
+            else {
+                volt_rms += volt[volt_edge_inx[i]];
+            }
+        }
+        volt_rms = volt_rms / (volt_edge_inx[volt_edge_rec - 1] - volt_edge_inx[0] + 1);
+        adc_done = 0;
+    }
+}
 
 void ADC12_0_INST_IRQHandler(void)
 {
@@ -102,6 +117,7 @@ void ADC12_0_INST_IRQHandler(void)
         case DL_ADC12_IIDX_DMA_DONE:
             adc_done |= 0x01;
             DL_TimerG_stopCounter(TIMER_0_INST);
+            adc_sample_inx = 0;
             break;
         default:
             break;
@@ -112,6 +128,27 @@ void ADC12_1_INST_IRQHandler(void)
     switch (DL_ADC12_getPendingInterrupt(ADC12_1_INST)) {
         case DL_ADC12_IIDX_DMA_DONE:
             adc_done |= 0x02;
+            break;
+        default:
+            break;
+    }
+}
+void GROUP1_IRQHandler(void)
+{
+    switch (DL_COMP_getPendingInterrupt(COMP_0_INST)) {
+        case DL_COMP_IIDX_OUTPUT_EDGE:
+            if (volt_edge_flag == 0) {
+                volt_edge_inx[volt_edge_rec] = adc_sample_inx;
+                volt_edge_rec++;
+                volt_edge_flag = 1;
+            }
+            break;
+        case DL_COMP_IIDX_OUTPUT_EDGE_INV:
+            if (volt_edge_flag == 1) {
+                volt_edge_inx[volt_edge_rec] = adc_sample_inx;
+                volt_edge_rec++;
+                volt_edge_flag = 0;
+            }
             break;
         default:
             break;

@@ -1,5 +1,5 @@
-#ifndef __DSP_H__
-#define __DSP_H__
+#ifndef __ADC_DATA_CONV_H__
+#define __ADC_DATA_CONV_H__
 
 #include "ti_msp_dl_config.h"
 
