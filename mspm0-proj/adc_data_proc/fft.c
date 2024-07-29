@@ -8,6 +8,8 @@ float current_spectrum[1024];
 float harmonic[15];
 //frequency increasement 4.88Hz
 
+float curr_thd;
+
 float find_max(float *array,uint16_t start,uint16_t end)
 {
     float max_value=0;
@@ -43,8 +45,19 @@ void fft_proc(float *input_signal)
     uint16_t base_wave_index=find_max_index(current_spectrum,3,20);
 
     for(uint16_t i=1;i<=15;i++){
-       harmonic[i]= find_max(current_spectrum, base_wave_index*i-3, base_wave_index*i+3);
+       harmonic[i]= find_max(current_spectrum, base_wave_index*i-3, base_wave_index*i+3) / 1024;
     }
 
+
+}
+
+void curr_thd_calc()
+{
+    float curr_pow_sum = 0;
+    float curr_sqrt = 0;
+    arm_power_f32(harmonic + 1, 14, &curr_pow_sum);
+    arm_sqrt_f32(&curr_pow_sum, &curr_sqrt);
+
+    curr_thd = curr_sqrt / harmonic[0];
 
 }
