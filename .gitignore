@@ -19,3 +19,6 @@
 mspm0-proj/keil/.vscode/*
 
 mspm0-proj/Event.dot
+
+.theia/
+
