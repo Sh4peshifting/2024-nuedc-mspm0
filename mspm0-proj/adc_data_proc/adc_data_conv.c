@@ -2,6 +2,7 @@
 #include "ti/driverlib/dl_comp.h"
 #include "ti/driverlib/m0p/dl_core.h"
 #include "ti_msp_dl_config.h"
+// #include <cstdint>
 
 
 extern uint16_t adc_sample_inx;
@@ -13,6 +14,10 @@ volatile uint8_t adc_done;
 
 float volt[RESULT_SIZE];
 float curr[RESULT_SIZE];
+
+
+// float volt_in[RESULT_SIZE];
+// float curr_in[RESULT_SIZE];
 
 float curr_real;
 float curr_real_calc_inx;
@@ -103,6 +108,20 @@ static void adc_data_sort()
     // curr_img = curr_img / curr_img_calc_inx;
 }
 
+static void adc_data_calc_input()
+{
+    uint16_t gain=1<<(DL_OPA_getGain(OPA_1_INST)>>13);
+    for (uint16_t i = 0; i < RESULT_SIZE ; i++) {
+        volt[i] = volt[i]*VOLT_COEF;
+        curr[i] = curr[i]*CURR_COEF/COIL_N/gain;
+    }
+
+    volt_rms = volt_ori_rms  * VOLT_COEF;
+    curr_rms = curr_ori_rms  * CURR_COEF / COIL_N/gain;
+}
+
+
+
 static void volt_rms_calc()
 {
     float volt_ori_temp = 0;
@@ -116,7 +135,6 @@ static void volt_rms_calc()
     }
 
     volt_ori_rms = volt_ori_temp / (volt_edge_inx[volt_edge_rec - 1] - volt_edge_inx[0] + 1);
-    
 
 }
 
@@ -201,7 +219,9 @@ void adc_data_opt()
         delay_cycles(CPUCLK_FREQ/2);
     } while (opa_gain_not_met);
     volt_rms_calc(); 
-    vc_rms_calc();
+    // vc_rms_calc();
+    adc_data_calc_input();
+    fft_proc(curr);
 }
 
 void ADC12_0_INST_IRQHandler(void)

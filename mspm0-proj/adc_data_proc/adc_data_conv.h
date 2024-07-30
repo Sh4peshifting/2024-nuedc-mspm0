@@ -3,6 +3,7 @@
 
 #include "ti_msp_dl_config.h"
 #include <string.h>
+#include "fft.h"
 
 #define RESULT_SIZE (2048)
 #define VOLT_COEF (1)
