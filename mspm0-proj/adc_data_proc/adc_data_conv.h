@@ -9,10 +9,10 @@
 #define CURR_COEF (1)
 #define COIL_N (1)
 
-#define HIGHMARGIN 3.13 
-#define LOWMARGIN  1.31 
+#define HIGHMARGIN 0.75 
+#define LOWMARGIN  0.25 
 #define MAXGAIN  DL_OPA_GAIN_N7_P8 // Maximum GAIN level of OPA wanted
-#define MINGAIN  DL_OPA_GAIN_N1_P2 // Minimum GAIN level of OPA wanted.
+#define MINGAIN  DL_OPA_GAIN_N31_P32 // Minimum GAIN level of OPA wanted.
 
 void adc_dma_init();
 

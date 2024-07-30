@@ -30,6 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ti/driverlib/dl_comp.h"
 #include "ti_msp_dl_config.h"
 #include "adc_data_conv.h"
 #include "fft.h"
@@ -42,10 +43,11 @@ int main(void)
     DL_SYSCTL_setPowerPolicyRUN0SLEEP0();
 
     adc_dma_init();
-    NVIC_EnableIRQ(COMP_0_INST_INT_IRQN);
+    DL_COMP_enable(COMP_0_INST);
+    NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
 
     while (1) {
         adc_data_opt();
-        __BKPT(0);
+        while (DL_GPIO_readPins(GPIO_SWITCHES_PORT, GPIO_SWITCHES_USER_SWITCH_1_PIN));
     }
 }

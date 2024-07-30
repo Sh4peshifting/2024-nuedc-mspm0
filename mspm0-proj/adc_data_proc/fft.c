@@ -56,7 +56,7 @@ void curr_thd_calc()
     float curr_pow_sum = 0;
     float curr_sqrt = 0;
     arm_power_f32(harmonic + 1, 14, &curr_pow_sum);
-    arm_sqrt_f32(&curr_pow_sum, &curr_sqrt);
+    arm_sqrt_f32(curr_pow_sum, &curr_sqrt);
 
     curr_thd = curr_sqrt / harmonic[0];
 
