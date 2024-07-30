@@ -3,6 +3,7 @@
 #include "ti/driverlib/m0p/dl_core.h"
 #include "ti_msp_dl_config.h"
 
+
 extern uint16_t adc_sample_inx;
 
 volatile uint16_t gADC0_Samples[RESULT_SIZE];
@@ -27,7 +28,7 @@ float volt_rms;
 float curr_rms;
 
 float curr_ori_rms;
-float volt_ori;
+float volt_ori_rms;
 
 volatile uint8_t opa_gain_not_met;
 
@@ -105,59 +106,58 @@ static void adc_data_sort()
 static void volt_rms_calc()
 {
     float volt_ori_temp = 0;
-    // for (uint16_t i = 0; i < volt_edge_rec; i++) {
-    //     if (volt[volt_edge_inx[i]] < 0) {
-    //         volt_ori_temp -= volt[volt_edge_inx[i]];
-    //     }
-    //     else {
-    //         volt_ori_temp += volt[volt_edge_inx[i]];
-    //     }
-    // }
-    volt_ori = volt_ori_temp / (volt_edge_inx[volt_edge_rec - 1] - volt_edge_inx[0] + 1);
+    for (uint16_t i = volt_edge_inx[0]; i < volt_edge_inx[volt_edge_rec - 1]; i++){
+        if(volt[i] < 0){
+            volt_ori_temp -= volt[i];
+        }
+        else {
+            volt_ori_temp += volt[i];
+        }
+    }
+
+    volt_ori_rms = volt_ori_temp / (volt_edge_inx[volt_edge_rec - 1] - volt_edge_inx[0] + 1);
     
-    volt_edge_flag = 0;
-    volt_edge_rec = 0;
-    adc_sample_inx = 0;
-    memset(volt_edge_inx, 0, 100);
-    adc_done = 0;
+
 }
 
 static void curr_ori_rms_calc()
 {
     float curr_ori_temp = 0;
 
-    for (uint16_t i = volt_edge_inx[0]; i< volt_edge_inx[volt_edge_rec-1];i++){
-        if(curr[i]<0){
-            curr_ori_temp-= curr[i];
+    for (uint16_t i = volt_edge_inx[0]; i < volt_edge_inx[volt_edge_rec - 1]; i++){
+        if(curr[i] < 0){
+            curr_ori_temp -= curr[i];
         }
         else {
-            curr_ori_temp+=curr[i];
+            curr_ori_temp +=curr[i];
         }
     }
 
     curr_ori_rms = curr_ori_temp / (volt_edge_inx[volt_edge_rec - 1] - volt_edge_inx[0] + 1);
     
-    volt_edge_flag = 0;
-    volt_edge_rec = 0;
-    adc_sample_inx = 0;
-    memset(volt_edge_inx, 0, 100);
-    adc_done = 0;
+    // volt_edge_flag = 0;
+    // volt_edge_rec = 0;
+    // adc_sample_inx = 0;
+    // memset(volt_edge_inx, 0, 100);
+    // adc_done = 0;
 }
 
 static void vc_rms_calc()
 {
-    volt_rms = volt_ori  * VOLT_COEF;
+    volt_rms = volt_ori_rms  * VOLT_COEF;
     curr_rms = curr_ori_rms  * CURR_COEF / COIL_N;
 }
+uint32_t Gain;
 
 static void opa_gain_adjust()
 {
+    Gain = DL_OPA_getGain(OPA_1_INST);
     uint32_t tempGain = 0;
     if (curr_ori_rms > HIGHMARGIN) {
-        tempGain = DL_OPA_getGain(OPA_0_INST);
+        tempGain = DL_OPA_getGain(OPA_1_INST);
         opa_gain_not_met = 1;
         if(tempGain > MINGAIN){
-            DL_OPA_decreaseGain(OPA_0_INST);
+            DL_OPA_decreaseGain(OPA_1_INST);
         }
         else {
             opa_gain_not_met = 0;
@@ -165,10 +165,10 @@ static void opa_gain_adjust()
         
     }
     else if (curr_ori_rms < LOWMARGIN) {
-        tempGain = DL_OPA_getGain(OPA_0_INST);
+        tempGain = DL_OPA_getGain(OPA_1_INST);
         opa_gain_not_met = 1;
         if(tempGain < MAXGAIN){
-           DL_OPA_increaseGain(OPA_0_INST);
+           DL_OPA_increaseGain(OPA_1_INST);
         }
         else {
             opa_gain_not_met = 0;
@@ -183,6 +183,12 @@ static void opa_gain_adjust()
 void adc_data_opt()
 {
     do {
+        volt_edge_flag = 0;
+        volt_edge_rec = 0;
+        adc_sample_inx = 0;
+        memset(volt_edge_inx, 0, 100);
+        adc_done = 0;
+
         NVIC_EnableIRQ(COMP_0_INST_INT_IRQN);
         DL_TimerG_startCounter(TIMER_0_INST);
         while (!adc_done) {
@@ -193,7 +199,9 @@ void adc_data_opt()
         curr_ori_rms_calc();
         opa_gain_adjust();
         delay_cycles(CPUCLK_FREQ/2);
-    } while (opa_gain_not_met); 
+    } while (opa_gain_not_met);
+    volt_rms_calc(); 
+    vc_rms_calc();
 }
 
 void ADC12_0_INST_IRQHandler(void)
@@ -226,7 +234,8 @@ void GROUP1_IRQHandler(void)
             if (volt_edge_flag == 0 && adc_sample_inx != 0) 
             {
                 volt_edge_inx[volt_edge_rec] = adc_sample_inx - 1;
-                volt_edge_rec++;
+                if(volt_edge_rec < 50)
+                    volt_edge_rec++;
                 volt_edge_flag = 1;
             }
             break;
@@ -234,7 +243,8 @@ void GROUP1_IRQHandler(void)
             if (volt_edge_flag == 1 && adc_sample_inx != 0) 
             {
                 volt_edge_inx[volt_edge_rec] = adc_sample_inx - 1;
-                volt_edge_rec++;
+                if(volt_edge_rec < 50)
+                    volt_edge_rec++;
                 volt_edge_flag = 0;
             }
             break;
