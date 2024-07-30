@@ -30,7 +30,6 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ti/driverlib/dl_comp.h"
 #include "ti_msp_dl_config.h"
 #include "adc_data_conv.h"
 #include "fft.h"
