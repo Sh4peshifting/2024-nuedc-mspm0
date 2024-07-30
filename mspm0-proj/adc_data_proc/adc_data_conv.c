@@ -2,7 +2,8 @@
 #include "ti/driverlib/dl_comp.h"
 #include "ti/driverlib/m0p/dl_core.h"
 #include "ti_msp_dl_config.h"
-// #include <cstdint>
+
+
 
 
 extern uint16_t adc_sample_inx;
@@ -94,7 +95,33 @@ void find_positive_half_cycles(float* signal, uint16_t size) {
     }
 }
 
-// (v*3.3/4096 -1.65)*COFFE
+void curr_real_img_calc()
+{
+    uint16_t max_real_inx = 0;
+    uint16_t max_img_inx = 0;
+    uint16_t half_pos_cycle = 0;
+
+    if (!volt_edge_flag) {
+        max_real_inx = volt_edge_rec / 2;
+        max_img_inx = volt_edge_rec / 2 - 1;
+    }
+    else {
+        max_real_inx = (volt_edge_rec - 1) / 2;
+        max_img_inx = (volt_edge_rec - 1) / 2;
+    }
+    for (uint16_t i = 0; i < max_real_inx; i++) {
+        curr_real += circuit_param_calc(curr, volt_edge_inx[2 * i], volt_edge_inx[2 * i + 1]);
+    }
+    for (uint16_t i = 0; i < max_img_inx; i++) {
+        half_pos_cycle = (volt_edge_inx[2 * i + 1] - volt_edge_inx[2 * i]) / 2;
+        curr_img += circuit_param_calc(curr, volt_edge_inx[2 * i] + half_pos_cycle, 
+            volt_edge_inx[2 * i + 1]) + half_pos_cycle;
+    }
+    curr_real = curr_real / max_real_inx;
+    curr_img = curr_img / max_img_inx;
+}
+
+// (volt*3.3/4096 -1.65)*COFFE
 // (curr*3.3/4096 -1.65) *COFFE/N 
 
 static void adc_data_sort()
@@ -220,8 +247,8 @@ void adc_data_opt()
     } while (opa_gain_not_met);
     volt_rms_calc(); 
     // vc_rms_calc();
-    adc_data_calc_input();
-    fft_proc(curr);
+    // adc_data_calc_input();
+    // fft_proc(curr);
 }
 
 void ADC12_0_INST_IRQHandler(void)

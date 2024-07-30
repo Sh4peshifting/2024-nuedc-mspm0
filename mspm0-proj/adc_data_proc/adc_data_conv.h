@@ -12,8 +12,8 @@
 
 #define HIGHMARGIN 0.75 
 #define LOWMARGIN  0.25 
-#define MINGAIN  DL_OPA_GAIN_N1_P2 // Maximum GAIN level of OPA wanted
-#define MAXGAIN  DL_OPA_GAIN_N31_P32 // Minimum GAIN level of OPA wanted.
+#define MINGAIN  DL_OPA_GAIN_N1_P2 // Minimum GAIN level of OPA wanted
+#define MAXGAIN  DL_OPA_GAIN_N31_P32 // Maximum GAIN level of OPA wanted.
 
 void adc_dma_init();
 
