@@ -1,10 +1,4 @@
 #include "adc_data_conv.h"
-#include "ti/driverlib/dl_comp.h"
-#include "ti/driverlib/m0p/dl_core.h"
-#include "ti_msp_dl_config.h"
-
-
-
 
 extern uint16_t adc_sample_inx;
 
@@ -21,10 +15,10 @@ float curr[RESULT_SIZE];
 // float curr_in[RESULT_SIZE];
 
 float curr_real;
-float curr_real_calc_inx;
+// float curr_real_calc_inx;
 
 float curr_img;
-float curr_img_calc_inx;
+// float curr_img_calc_inx;
 
 uint16_t volt_edge_rec;
 uint16_t volt_edge_inx[50];
@@ -66,34 +60,34 @@ float circuit_param_calc(float* param_input,uint16_t start_inx, uint16_t end_inx
     return circuit_param;
 }
 
-void find_positive_half_cycles(float* signal, uint16_t size) {
-    uint16_t pos_start = 0;
-    uint16_t pos_end = 0;
-    uint16_t nege_start = 0;
-    uint16_t nege_end = 0;
-    uint16_t half_pos_cycle = 0;
+// void find_positive_half_cycles(float* signal, uint16_t size) {
+//     uint16_t pos_start = 0;
+//     uint16_t pos_end = 0;
+//     uint16_t nege_start = 0;
+//     uint16_t nege_end = 0;
+//     uint16_t half_pos_cycle = 0;
 
-    uint16_t in_positive_half_cycle = 0;
+//     uint16_t in_positive_half_cycle = 0;
 
-    for (uint16_t i = 1; i < size; i++) {
-        if (signal[i] > 0 && signal[i - 1] <= 0) {
-            pos_start = i;
-            in_positive_half_cycle = 1;
-        } else if (signal[i] <= 0 && signal[i - 1] > 0 && in_positive_half_cycle) {
-            pos_end = i - 1; 
-            curr_real += circuit_param_calc(curr ,pos_start, pos_end);
-            curr_real_calc_inx++;
-            in_positive_half_cycle = 0;
-            half_pos_cycle = (pos_end - pos_start) / 2;
-            nege_start = pos_start + half_pos_cycle;
-            nege_end = pos_end + half_pos_cycle;
-            if (nege_end < RESULT_SIZE){
-                curr_img += circuit_param_calc(curr, nege_start, nege_end);
-                curr_img_calc_inx++;
-            }
-        }
-    }
-}
+//     for (uint16_t i = 1; i < size; i++) {
+//         if (signal[i] > 0 && signal[i - 1] <= 0) {
+//             pos_start = i;
+//             in_positive_half_cycle = 1;
+//         } else if (signal[i] <= 0 && signal[i - 1] > 0 && in_positive_half_cycle) {
+//             pos_end = i - 1; 
+//             curr_real += circuit_param_calc(curr ,pos_start, pos_end);
+//             curr_real_calc_inx++;
+//             in_positive_half_cycle = 0;
+//             half_pos_cycle = (pos_end - pos_start) / 2;
+//             nege_start = pos_start + half_pos_cycle;
+//             nege_end = pos_end + half_pos_cycle;
+//             if (nege_end < RESULT_SIZE){
+//                 curr_img += circuit_param_calc(curr, nege_start, nege_end);
+//                 curr_img_calc_inx++;
+//             }
+//         }
+//     }
+// }
 
 void curr_real_img_calc()
 {
