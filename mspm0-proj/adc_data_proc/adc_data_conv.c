@@ -36,6 +36,7 @@ float curr_rms;
 float curr_ori_rms;
 float volt_ori_rms;
 
+float AP,PF;
 volatile uint8_t opa_gain_not_met;
 
 void adc_dma_init()
@@ -124,6 +125,7 @@ void curr_real_img_calc()
 // (volt*3.3/4096 -1.65)*COFFE
 // (curr*3.3/4096 -1.65) *COFFE/N 
 
+
 static void adc_data_sort()
 {
     for (uint16_t i = 0; i < RESULT_SIZE ; i++) {
@@ -145,6 +147,10 @@ static void adc_data_calc_input()
 
     volt_rms = volt_ori_rms  * VOLT_COEF;
     curr_rms = curr_ori_rms  * CURR_COEF / COIL_N/gain;
+
+    AP=volt_rms*curr_real;
+    PF= AP/(volt_rms*curr_rms);
+    
 }
 
 
@@ -247,8 +253,8 @@ void adc_data_opt()
     } while (opa_gain_not_met);
     volt_rms_calc(); 
     // vc_rms_calc();
-    // adc_data_calc_input();
-    // fft_proc(curr);
+    adc_data_calc_input();
+    fft_proc(curr);
 }
 
 void ADC12_0_INST_IRQHandler(void)

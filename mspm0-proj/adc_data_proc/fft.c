@@ -1,13 +1,11 @@
 #include "fft.h"
 #include "arm_const_structs.h"
 #include "arm_math.h"
-// #include <cstdint>
 #include <stdio.h>
 
-float current_spectrum[1024];
+// float current_spectrum[2048];
 float harmonic[16];
 //frequency increasement 4.88Hz
-
 float curr_thd;
 
 float find_max(float *array,uint16_t start,uint16_t end)
@@ -39,13 +37,19 @@ uint16_t find_max_index(float *array,uint16_t start,uint16_t end)
 
 void fft_proc(float *input_signal)
 {
-    arm_cfft_f32(&arm_cfft_sR_f32_len2048 , input_signal , 0 , 1);
-    arm_cmplx_mag_f32(input_signal,current_spectrum,2048);
+    float input_cmplx[2048]={0};
+    for (uint16_t i = 0; i < 1024; i++)
+    {
+        input_cmplx[2*i] = input_signal[i];
+    }
 
-    uint16_t base_wave_index=find_max_index(current_spectrum,3,20);
-    harmonic[1]=find_max(current_spectrum,3,20);
+    arm_cfft_f32(&arm_cfft_sR_f32_len1024 , input_cmplx , 0 , 1);
+    arm_cmplx_mag_f32(input_cmplx,volt,1024);
+
+    uint16_t base_wave_index=find_max_index(volt,3,20);
+    harmonic[1]=find_max(volt,3,20);
     for(uint16_t i=2;i<16;i++){
-       harmonic[i]= find_max(current_spectrum, base_wave_index*i-3, base_wave_index*i+3) / 1024;
+       harmonic[i]= find_max(volt, base_wave_index*i-3, base_wave_index*i+3) / 1024;
     }
 
 

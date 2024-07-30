@@ -5,7 +5,7 @@
 #include "arm_const_structs.h"
 #include "arm_math.h"
 
-extern float current_spectrum[1024];
+extern float volt[2048];
 void fft_proc(float *input_signal);
 
 
