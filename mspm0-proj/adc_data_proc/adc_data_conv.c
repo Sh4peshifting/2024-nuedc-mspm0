@@ -1,5 +1,5 @@
 #include "adc_data_conv.h"
-
+#include <machine/_stdint.h>
 extern uint16_t adc_sample_inx;
 
 volatile uint16_t gADC0_Samples[RESULT_SIZE];
@@ -32,6 +32,8 @@ float volt_ori_rms;
 
 float AP,PF;
 volatile uint8_t opa_gain_not_met;
+
+uint8_t current_range;
 
 uint16_t peak_to_peak_calc(uint16_t* array, uint16_t size)
 {
@@ -246,26 +248,30 @@ static void opa_gain_adjust()
 
 void range_adjust()
 {
-    float vpp;
+    float vpp=3.3*peak_to_peak_calc(gADC1_Samples,1024)/4096;
+
     switch (current_range) {
         case 1:
-            if(vpp>15): current_range=2;
-            if(vpp<15): current_range=2;
+            if(vpp>15) current_range=2;
+            if(vpp<15) current_range=2;
             break;
         case 2:
-            if(vpp>15): current_range=2;
-            if(vpp<15): current_range=2;
+            if(vpp>15) current_range=2;
+            if(vpp<15) current_range=2;
             break;
         case 3:
-            if(vpp<15): current_range=2;
+            if(vpp<15) current_range=2;
             break;
     }
+
+    //call range adjust functions here
+    
 }
 
 
 void adc_data_opt()
 {
-    do {
+    // do {
         volt_edge_flag = 0;
         volt_edge_rec = 0;
         adc_sample_inx = 0;
@@ -278,11 +284,14 @@ void adc_data_opt()
             __WFE();
         }
 
-        adc_data_sort();
-        curr_ori_rms_calc();
-        opa_gain_adjust();
+        range_adjust();
+
+        // curr_ori_rms_calc();
+        // opa_gain_adjust();
+
         delay_cycles(CPUCLK_FREQ/2);
-    } while (opa_gain_not_met);
+    // } while (opa_gain_not_met);
+    adc_data_sort();
     curr_ori_rms_calc();
     volt_ori_rms_calc(); 
     adc_data_calc_input();

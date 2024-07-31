@@ -34,6 +34,17 @@ uint16_t find_max_index(float *array,uint16_t start,uint16_t end)
     return max_index;
 }
 
+void curr_thd_calc()
+{
+    float curr_pow_sum = 0;
+    float curr_sqrt = 0;
+    arm_power_f32(harmonic+2, 14, &curr_pow_sum);
+    arm_sqrt_f32(curr_pow_sum, &curr_sqrt);
+
+    curr_thd = curr_sqrt / harmonic[1];
+
+}
+
 
 void fft_proc(float *input_signal)
 {
@@ -51,17 +62,7 @@ void fft_proc(float *input_signal)
     for(uint16_t i=2;i<16;i++){
        harmonic[i]= find_max(volt, base_wave_index*i-3, base_wave_index*i+3) / 512;
     }
-
-
-}
-
-void curr_thd_calc()
-{
-    float curr_pow_sum = 0;
-    float curr_sqrt = 0;
-    arm_power_f32(harmonic+2, 14, &curr_pow_sum);
-    arm_sqrt_f32(curr_pow_sum, &curr_sqrt);
-
-    curr_thd = curr_sqrt / harmonic[1];
+    curr_thd_calc();
 
 }
+

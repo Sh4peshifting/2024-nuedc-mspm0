@@ -6,6 +6,7 @@
 #include "arm_math.h"
 
 extern float volt[1024];
+extern float curr_thd;
 void fft_proc(float *input_signal);
 
 

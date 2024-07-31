@@ -7,7 +7,7 @@
 #include "quick_sort.h"
 
 #define RESULT_SIZE (1024)
-#define VOLT_COEF (1)
+#define VOLT_COEF (586.802)
 #define CURR_COEF (1)
 #define COIL_N (1)
 
