@@ -245,6 +245,7 @@ static void opa_gain_adjust()
     }
 }
 
+<<<<<<< HEAD
 
 void range_adjust()
 {
@@ -269,6 +270,27 @@ void range_adjust()
 }
 
 
+=======
+void external_gain_adjust(uint8_t gain_mode)
+{
+    switch (gain_mode) {
+        case 0:
+            DL_GPIO_clearPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_0_PIN | GPIO_GAIN_SW_PIN_1_PIN);
+        break;
+        case 1:
+            DL_GPIO_clearPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_1_PIN);
+            DL_GPIO_setPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_0_PIN);
+        break;
+        case 2:
+            DL_GPIO_clearPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_0_PIN);
+            DL_GPIO_setPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_1_PIN);
+        break;
+        default:
+        break;
+    }
+}
+
+>>>>>>> 59164a4a30a66d915ad1cec2467d8dd854796cd3
 void adc_data_opt()
 {
     // do {
