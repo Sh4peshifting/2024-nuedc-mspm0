@@ -157,7 +157,8 @@ static void adc_data_sort()
 
 static void adc_data_calc_input()
 {
-    uint16_t gain=1<<(DL_OPA_getGain(OPA_1_INST)>>13);
+    // uint16_t gain=1<<(DL_OPA_getGain(OPA_1_INST)>>13);
+    uint16_t gain=1;
     for (uint16_t i = 0; i < RESULT_SIZE ; i++) {
         volt[i] = volt[i]*VOLT_COEF;
         curr[i] = curr[i]*CURR_COEF/COIL_N/gain;
@@ -246,29 +247,6 @@ static void opa_gain_adjust()
 }
 
 
-void range_adjust()
-{
-    float vpp=3.3*peak_to_peak_calc(gADC1_Samples,1024)/4096;
-
-    switch (current_range) {
-        case 1:
-            if(vpp>15) current_range=2;
-            if(vpp<15) current_range=2;
-            break;
-        case 2:
-            if(vpp>15) current_range=2;
-            if(vpp<15) current_range=2;
-            break;
-        case 3:
-            if(vpp<15) current_range=2;
-            break;
-    }
-
-    //call range adjust functions here
-    
-}
-
-
 void external_gain_adjust(uint8_t gain_mode)
 {
     switch (gain_mode) {
@@ -286,6 +264,31 @@ void external_gain_adjust(uint8_t gain_mode)
         default:
         break;
     }
+}
+
+
+
+void range_adjust()
+{
+    // float vpp=3.3*peak_to_peak_calc(gADC1_Samples,1024)/4096;
+    float vpp;
+    switch (current_range) {
+        case 1:
+            if(vpp>15) current_range=2;
+            if(vpp<15) current_range=2;
+            break;
+        case 2:
+            if(vpp>15) current_range=2;
+            if(vpp<15) current_range=2;
+            break;
+        case 3:
+            if(vpp<15) current_range=2;
+            break;
+    }
+
+    //call range adjust functions here
+    external_gain_adjust(0);
+    
 }
 
 void adc_data_opt()
