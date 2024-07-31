@@ -4,6 +4,7 @@
 #include "ti_msp_dl_config.h"
 #include <string.h>
 #include "fft.h"
+#include "quick_sort.h"
 
 #define RESULT_SIZE (1024)
 #define VOLT_COEF (1)
@@ -18,5 +19,6 @@
 void adc_dma_init();
 
 void adc_data_opt();
+uint16_t peak_to_peak_calc(uint16_t* array, uint16_t size);
 
 #endif

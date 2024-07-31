@@ -32,6 +32,23 @@ float volt_ori_rms;
 
 volatile uint8_t opa_gain_not_met;
 
+uint16_t peak_to_peak_calc(uint16_t* array, uint16_t size)
+{
+    uint16_t array_sorted[size];
+    memcpy(array_sorted, array, size * 2);
+    quickSort(array_sorted, 0, size - 1);
+
+    uint16_t max_val = 0;
+    uint16_t min_val = 0;
+    for (uint8_t i = 0; i < 5; i++) {
+        max_val += array_sorted[size - 1 - i];
+        min_val += array_sorted[i];
+    }
+    max_val = max_val / 5;
+    min_val = min_val / 5;
+    return max_val - max_val;    
+}
+
 void adc_dma_init()
 {
      DL_DMA_setSrcAddr(DMA, DMA_CH0_CHAN_ID,
