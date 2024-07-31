@@ -35,17 +35,15 @@ volatile uint8_t opa_gain_not_met;
 
 uint8_t current_range;
 
-uint16_t peak_to_peak_calc(uint16_t* array, uint16_t size)
+uint16_t peak_to_peak_calc(uint16_t array, uint16_t size)
 {
-    uint16_t array_sorted[size];
-    memcpy(array_sorted, array, size * 2);
-    quickSort(array_sorted, 0, size - 1);
+    quickSort(array, 0, size - 1);
 
     uint16_t max_val = 0;
     uint16_t min_val = 0;
     for (uint8_t i = 0; i < 5; i++) {
-        max_val += array_sorted[size - 1 - i];
-        min_val += array_sorted[i];
+        max_val += array[size - 1 - i];
+        min_val += array[i];
     }
     max_val = max_val / 5;
     min_val = min_val / 5;
@@ -138,6 +136,16 @@ void curr_real_img_calc()
     }
     curr_real = curr_real / max_real_inx;
     curr_img = curr_img / max_img_inx;
+}
+
+float power_calc()
+{
+    float power = 0;
+    for (uint16_t i = volt_edge_inx[0]; i <= volt_edge_inx[volt_edge_rec - 1]; i++) {
+        power += volt[i] * curr[i];
+    }
+    power = power / (volt_edge_inx[volt_edge_rec - 1] - volt_edge_inx[0] + 1);
+    return power;
 }
 
 // (volt*3.3/4096 -1.65)*COFFE
