@@ -27,7 +27,7 @@ uint16_t find_max_index(float *array,uint16_t start,uint16_t end)
     uint16_t max_index=0;
     for(uint16_t i=start;i<end;i++){
         if(array[i]>max_value ){
-
+            max_value=array[i];
             max_index=i;
         }
     }
@@ -47,9 +47,9 @@ void fft_proc(float *input_signal)
     arm_cmplx_mag_f32(input_cmplx,volt,1024);
 
     uint16_t base_wave_index=find_max_index(volt,3,20);
-    harmonic[1]=find_max(volt,3,20);
+    harmonic[1]=find_max(volt,3,20)/1024;
     for(uint16_t i=2;i<16;i++){
-       harmonic[i]= find_max(volt, base_wave_index*i-3, base_wave_index*i+3) / 1024;
+       harmonic[i]= find_max(volt, base_wave_index*i-3, base_wave_index*i+3) / 512;
     }
 
 

@@ -14,10 +14,10 @@ float curr[RESULT_SIZE];
 // float volt_in[RESULT_SIZE];
 // float curr_in[RESULT_SIZE];
 
-float curr_real;
+volatile float curr_real;
 // float curr_real_calc_inx;
 
-float curr_img;
+volatile float curr_img;
 // float curr_img_calc_inx;
 
 uint16_t volt_edge_rec;
@@ -90,12 +90,17 @@ float circuit_param_calc(float* param_input,uint16_t start_inx, uint16_t end_inx
 //     }
 // }
 
-void curr_real_img_calc()
-{
     uint16_t max_real_inx = 0;
     uint16_t max_img_inx = 0;
     uint16_t half_pos_cycle = 0;
+    
+void curr_real_img_calc()
+{
 
+
+    curr_real = 0;
+    curr_img = 0;
+    
     if (!volt_edge_flag) {
         max_real_inx = volt_edge_rec / 2;
         max_img_inx = volt_edge_rec / 2 - 1;
@@ -110,7 +115,7 @@ void curr_real_img_calc()
     for (uint16_t i = 0; i < max_img_inx; i++) {
         half_pos_cycle = (volt_edge_inx[2 * i + 1] - volt_edge_inx[2 * i]) / 2;
         curr_img += circuit_param_calc(curr, volt_edge_inx[2 * i] + half_pos_cycle, 
-            volt_edge_inx[2 * i + 1]) + half_pos_cycle;
+            volt_edge_inx[2 * i + 1] + half_pos_cycle) ;
     }
     curr_real = curr_real / max_real_inx;
     curr_img = curr_img / max_img_inx;
@@ -138,7 +143,7 @@ static void adc_data_calc_input()
         volt[i] = volt[i]*VOLT_COEF;
         curr[i] = curr[i]*CURR_COEF/COIL_N/gain;
     }
-
+    curr_real_img_calc();
     volt_rms = volt_ori_rms  * VOLT_COEF;
     curr_rms = curr_ori_rms  * CURR_COEF / COIL_N/gain;
 
@@ -149,7 +154,7 @@ static void adc_data_calc_input()
 
 
 
-static void volt_rms_calc()
+static void volt_ori_rms_calc()
 {
     float volt_ori_temp = 0;
     for (uint16_t i = volt_edge_inx[0]; i < volt_edge_inx[volt_edge_rec - 1]; i++){
@@ -187,11 +192,7 @@ static void curr_ori_rms_calc()
     // adc_done = 0;
 }
 
-static void vc_rms_calc()
-{
-    volt_rms = volt_ori_rms  * VOLT_COEF;
-    curr_rms = curr_ori_rms  * CURR_COEF / COIL_N;
-}
+
 uint32_t Gain;
 
 static void opa_gain_adjust()
@@ -225,6 +226,26 @@ static void opa_gain_adjust()
     }
 }
 
+
+void range_adjust()
+{
+    float vpp;
+    switch (current_range) {
+        case 1:
+            if(vpp>15): current_range=2;
+            if(vpp<15): current_range=2;
+            break;
+        case 2:
+            if(vpp>15): current_range=2;
+            if(vpp<15): current_range=2;
+            break;
+        case 3:
+            if(vpp<15): current_range=2;
+            break;
+    }
+}
+
+
 void adc_data_opt()
 {
     do {
@@ -245,8 +266,8 @@ void adc_data_opt()
         opa_gain_adjust();
         delay_cycles(CPUCLK_FREQ/2);
     } while (opa_gain_not_met);
-    volt_rms_calc(); 
-    // vc_rms_calc();
+    curr_ori_rms_calc();
+    volt_ori_rms_calc(); 
     adc_data_calc_input();
     fft_proc(curr);
 }
