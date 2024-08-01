@@ -407,13 +407,10 @@ void curr_thd_calc()
 void fft_proc(float *input_signal)
 {
     float input_cmplx[2048]={0};
-    for (uint16_t i = 0; i < 1024; i++)
-    {
+    for (uint16_t i = 0; i < 1024; i++){
         input_cmplx[2*i] = input_signal[i]*hamming[i];
-        
     }
     
-
     arm_cfft_f32(&arm_cfft_sR_f32_len1024 , input_cmplx , 0 , 1);
     arm_cmplx_mag_f32(input_cmplx,volt,1024);
 
@@ -423,6 +420,5 @@ void fft_proc(float *input_signal)
        harmonic[i]= find_max(volt, base_wave_index*i-3, base_wave_index*i+3) / 512;
     }
     curr_thd_calc();
-
 }
 

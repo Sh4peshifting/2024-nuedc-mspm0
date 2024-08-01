@@ -41,7 +41,7 @@ const mux4       = system.clockTree["EXHFMUX"];
 mux4.inputSelect = "EXHFMUX_XTAL";
 
 const mux8       = system.clockTree["HSCLKMUX"];
-mux8.inputSelect = "HSCLKMUX_SYSPLL2X";
+mux8.inputSelect = "HSCLKMUX_HFCLK";
 
 const mux12       = system.clockTree["SYSPLLMUX"];
 mux12.inputSelect = "zSYSPLLMUX_HFCLK";

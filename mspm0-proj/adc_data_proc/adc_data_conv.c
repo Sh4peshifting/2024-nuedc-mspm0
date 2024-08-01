@@ -174,7 +174,7 @@ static void adc_data_sort()
 static void adc_data_calc_input()
 {
     // uint16_t gain=1<<(DL_OPA_getGain(OPA_1_INST)>>13);
-    uint16_t gain=1;
+    // uint16_t gain=1;
     for (uint16_t i = 0; i < RESULT_SIZE ; i++) {
         volt[i] = volt[i]*VOLT_COEF;
         curr[i] = curr[i]*gain_coef[current_range]/COIL_N;
