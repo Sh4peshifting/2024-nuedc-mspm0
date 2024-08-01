@@ -6,6 +6,7 @@ typedef unsigned int uint;
 
 unsigned char HZK[] =
 		{
+            0xE0,0x10,0xC8,0x28,0xE8,0xF0,0x00,0x00,0x03,0x04,0x0B,0x0A,0x0B,0x05,0x00,0x00,
 				0x10, 0x60, 0x02, 0x8C, 0x00, 0x0E, 0x22, 0x12, 0x0A, 0xC2, 0x0A, 0x12, 0x22, 0x0E, 0x00, 0x00,
 				0x04, 0x04, 0x7E, 0x01, 0x20, 0x21, 0x11, 0x09, 0x05, 0xFF, 0x05, 0x09, 0x11, 0x21, 0x20, 0x00, /*"??",0*/
 
@@ -175,14 +176,14 @@ void display(uchar a, uchar b)
 	delay_ms(80);
 }
 
-void disp_HZ16(uchar uc_RowNo, uchar uc_ColNo, uchar uc_HZCode)
+void disp_HZ162(uchar uc_RowNo, uchar uc_ColNo, uchar uc_HZCode)
 {
 	uchar uc_PageCnt, uc_ColCnt;
 	uchar uc_PageAddr;
 
 	uc_PageAddr = 0xB0 | (uc_RowNo * 2);
 
-	for (uc_PageCnt = 0; uc_PageCnt < 1; uc_PageCnt++)
+	for (uc_PageCnt = 0; uc_PageCnt < 2; uc_PageCnt++)
 	{
 		write(uc_PageAddr, 0); // Set Page Address
 
@@ -196,6 +197,36 @@ void disp_HZ16(uchar uc_RowNo, uchar uc_ColNo, uchar uc_HZCode)
 	}
 }
 
+void disp_HZ16(uchar uc_RowNo, uchar uc_ColNo, uchar uc_HZCode)
+{
+	uchar uc_PageCnt, uc_ColCnt;
+	uchar uc_PageAddr;
+
+	uc_PageAddr = 0xB0 | (uc_RowNo * 2);
+    uc_HZCode-=32;
+
+	for (uc_PageCnt = 0; uc_PageCnt < 2; uc_PageCnt++)
+	{
+		write(uc_PageAddr, 0); // Set Page Address
+
+		write(0x10 | ((uc_ColNo >> 4) & 0x0F), 0); // Set Upper Bit Column Address
+		write(0x00 | (uc_ColNo & 0x0F), 0);				 // Set Low Bit Column Address
+
+		for (uc_ColCnt = 0; uc_ColCnt < 8; uc_ColCnt++)
+			write(ascii_tbl[uc_HZCode*16 + uc_PageCnt * 8 + uc_ColCnt], 1);
+
+		uc_PageAddr++;
+	}
+}
+
+
+
+void set_axis(uint8_t x,uint8_t y)
+{
+    write(0xB0|y,0);           //y的值为0~8 
+    write(0x10|(x>>4),0); 
+    write(0x00|(x&0x0F),0); 
+}
 void disp_HZ16str(uchar uc_RowNo, uchar uc_ColNo, uchar *HZinf, uchar uc_HZCnt)
 {
 	uchar uc_CharCnt;
@@ -203,7 +234,7 @@ void disp_HZ16str(uchar uc_RowNo, uchar uc_ColNo, uchar *HZinf, uchar uc_HZCnt)
 	for (uc_CharCnt = 0; uc_CharCnt < uc_HZCnt; uc_CharCnt++)
 	{
 		disp_HZ16(uc_RowNo, uc_ColNo, HZinf[uc_CharCnt]);
-		uc_ColNo = uc_ColNo + 16;
+		uc_ColNo = uc_ColNo + 8;
 	}
 }
 
@@ -273,18 +304,21 @@ void screen_init(void)
 
 	write(0xaf, 0); // Dispaly On
 	delay_ms(1);		// 1ms
+
+    display(0x00, 0x00);//clear screen
+    //display(0xff, 0xff); //all black
+    // display(0xaa, 0x55); //interval black
 }
 
 void disp()
 {
-    	//display(0xff, 0xff);
-
-		display(0x00, 0x00);
-
-		// display(0xaa, 0x55);
-
-		disp_HZ16str(2, 0, SMWDZ, 5);
+	
+        uint8_t str[5]={0};
+        disp_HZ16str(0, 0, "abcdefghijk", 10);
+        disp_HZ16str(1, 0, "AHDSDFDSFSF", 10);
+		disp_HZ16str(2, 0, "DSVDVSVSDF", 10);
+        disp_HZ16str(3, 0, "ab)(&^$^*&^$*", 10);
         // disp_str_ascii(2,0,"     ",5);
-
+        // disp_HZ16(2,0,0);
 		delay_ms(80);
 }
