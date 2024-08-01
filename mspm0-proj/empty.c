@@ -34,6 +34,7 @@
 #include "adc_data_conv.h"
 #include "fft.h"
 #include "timer.h"
+#include "screen_driver.h"
 
 
 int main(void)
@@ -44,10 +45,13 @@ int main(void)
     adc_dma_init();
     DL_COMP_enable(COMP_0_INST);
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
-
+    
+    screen_init();
     while (1) {
-        adc_data_opt();
+        // adc_data_opt();
         // while (DL_GPIO_readPins(GPIO_SWITCHES_PORT, GPIO_SWITCHES_USER_SWITCH_1_PIN));
+        disp();
+        delay_cycles(CPUCLK_FREQ);
             
     }
 }
