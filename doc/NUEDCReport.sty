@@ -1,0 +1,129 @@
+\ProvidesPackage{NUEDCReport}
+
+%%页边距
+\RequirePackage[left=2.50cm, right=2.50cm, top=3.00cm, bottom=2.50cm]{geometry}
+
+%%一些必要的宏包
+\RequirePackage[unicode=true,colorlinks,urlcolor=black,linkcolor=black,bookmarksnumbered=true]{hyperref}
+\RequirePackage{latexsym,amssymb,amsmath,amsbsy,amsopn,amstext,amsthm,amsxtra,color,bm,calc,ifpdf}
+\RequirePackage{graphicx}
+\RequirePackage{enumerate}
+\RequirePackage{fancyhdr}
+\RequirePackage{listings}
+\RequirePackage{multirow}
+\RequirePackage{makeidx}
+\RequirePackage{xcolor}
+% \RequirePackage{fontspec}
+% \RequirePackage{subfigure}
+\PassOptionsToPackage{hyphens}{url}
+\RequirePackage{hyperref}
+\RequirePackage{titlesec}
+\RequirePackage{titletoc}
+\RequirePackage{float}
+\RequirePackage{caption}
+\RequirePackage{booktabs}
+\RequirePackage{abstract}
+
+\RequirePackage{tcolorbox}
+
+\RequirePackage{fontawesome}
+
+%% 更改摘要二字的样式
+\renewcommand{\abstractname}{\textbf{\large {摘\quad 要}}} 
+
+%可固定下划线长度
+\makeatletter
+\newcommand\dlmu[2][4cm]{\hskip1pt\underline{\hb@xt@ #1{\hss#2\hss}}\hskip3pt}
+\makeatother
+
+%更改主题
+% \hypersetup{
+%     colorlinks=true,
+%     linkcolor=blue,
+%     filecolor=blue,      
+%     urlcolor=Magenta,
+%     citecolor=orange,
+% }
+
+%%对一些autoref的中文引用名作修改
+\def\equationautorefname{式}
+\def\footnoteautorefname{脚注}
+\def\itemautorefname{项}
+\def\figureautorefname{图}
+\def\subfigureautorefname{图}
+
+\def\tableautorefname{表}
+\def\partautorefname{篇}
+\def\appendixautorefname{附录}
+\def\chapterautorefname{章}
+\def\sectionautorefname{节}
+\def\subsectionautorefname{小小节}
+\def\subsubsectionautorefname{subsubsection}
+\def\paragraphautorefname{段落}
+\def\subparagraphautorefname{子段落}
+\def\FancyVerbLineautorefname{行}
+\def\theoremautorefname{定理}
+
+\newtheorem{Theorem}{定理}[section]
+\newtheorem{Lemma}[Theorem]{引理}
+\newtheorem{Corollary}[Theorem]{推论}
+\newtheorem{Proposition}[Theorem]{命题}
+\newtheorem{Definition}[Theorem]{定义}
+\newtheorem{Example}[Theorem]{例}
+
+%%参考文献设置
+\newcommand{\reference}{
+\nocite{*}   %打开此选项会列出bib里面的所有参考文献
+\bibliographystyle{gbt7714-numerical} %规定了参考文献的格式
+% \begin{center}%居中
+	\bibliography{ref} %调出LaTeX生成参考文献列表
+% \end{center}
+}
+
+%%文本框设置
+\newcommand{\tbox}[1]{
+\begin{center}
+\begin{tcolorbox}[colback=gray!10,%gray background
+                  colframe=black,% black frame colour
+                  width=8cm,% Use 8cm total width,
+                  arc=1mm, auto outer arc,
+                  boxrule=0.5pt,
+                 ]
+{#1}
+\end{tcolorbox}
+\end{center}
+}
+
+%%页眉设置
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt} % no upper line
+
+
+%封面页设置
+{   
+    \title{ 
+    % \vspace{3cm} %使用校徽时移除该vspace
+    \kaishu \Huge \textbf{{山东省大学生电子设计竞赛设计报告}} \par
+     \vspace{1cm}
+    % \vspace{2cm} 
+    \heiti \Large {{单相功率分析仪（B题）}} \par   
+    \vspace{9cm} 
+    }%标题 
+    \author{}    
+    \date{\today} % 默认为今天的日期，可以注释掉不显示日期
+}
+
+%%在这里可更改封面logo
+\newcommand{\cover}{
+%%封面校名logo，图片都在figures文件夹里
+\begin{figure}
+	\centering
+        \vspace{2cm}
+        \includegraphics[width=0.4\textwidth]{figures/logo.png}
+\end{figure} 
+
+\maketitle
+}
+
