@@ -35,20 +35,28 @@ volatile uint8_t opa_gain_not_met;
 
 uint8_t current_range;
 
-uint16_t peak_to_peak_calc(uint16_t array, uint16_t size)
-{
-    quickSort(array, 0, size - 1);
+float gain_coef[]={
+    0.18769,
+    1.11307,
+    4.0458
+};
 
-    uint16_t max_val = 0;
-    uint16_t min_val = 0;
-    for (uint8_t i = 0; i < 5; i++) {
-        max_val += array[size - 1 - i];
-        min_val += array[i];
-    }
-    max_val = max_val / 5;
-    min_val = min_val / 5;
-    return max_val - max_val;    
-}
+// uint16_t peak_to_peak_calc(uint16_t* array, uint16_t size)
+// {
+//     uint16_t array_temp[size];
+//     memcpy(array_temp, array, size * 2);
+//     // quickSort(array_temp, 0, size - 1);
+
+//     uint16_t max_val = 0;
+//     uint16_t min_val = 0;
+//     for (uint8_t i = 0; i < 5; i++) {
+//         max_val += array_temp[size - 1 - i];
+//         min_val += array_temp[i];
+//     }
+//     max_val = max_val / 5;
+//     min_val = min_val / 5;
+//     return max_val - max_val;    
+// }
 
 void adc_dma_init()
 {
@@ -169,13 +177,16 @@ static void adc_data_calc_input()
     uint16_t gain=1;
     for (uint16_t i = 0; i < RESULT_SIZE ; i++) {
         volt[i] = volt[i]*VOLT_COEF;
-        curr[i] = curr[i]*CURR_COEF/COIL_N/gain;
+        curr[i] = curr[i]*gain_coef[current_range]/COIL_N;
     }
-    curr_real_img_calc();
-    volt_rms = volt_ori_rms  * VOLT_COEF;
-    curr_rms = curr_ori_rms  * CURR_COEF / COIL_N/gain;
+    // curr_real_img_calc();
+    // volt_rms = volt_ori_rms  * VOLT_COEF;
+    // curr_rms = curr_ori_rms  * CURR_COEF / COIL_N/gain;
+    arm_rms_f32(volt+volt_edge_inx[0], volt_edge_inx[volt_edge_rec-1]-volt_edge_inx[0]+1, &volt_rms);
+    arm_rms_f32(curr+volt_edge_inx[0], volt_edge_inx[volt_edge_rec-1]-volt_edge_inx[0]+1, &curr_rms);
 
-    AP=volt_rms*curr_real;
+    // AP=volt_rms*curr_real;
+    AP=power_calc();
     PF= AP/(volt_rms*curr_rms);
     
 }
@@ -261,11 +272,11 @@ void external_gain_adjust(uint8_t gain_mode)
         case 0:
             DL_GPIO_clearPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_0_PIN | GPIO_GAIN_SW_PIN_1_PIN);
         break;
-        case 1:
+        case 2:
             DL_GPIO_clearPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_1_PIN);
             DL_GPIO_setPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_0_PIN);
         break;
-        case 2:
+        case 1:
             DL_GPIO_clearPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_0_PIN);
             DL_GPIO_setPins(GPIO_GAIN_SW_PORT, GPIO_GAIN_SW_PIN_1_PIN);
         break;
@@ -275,27 +286,39 @@ void external_gain_adjust(uint8_t gain_mode)
 }
 
 
+uint16_t find_vpp(uint16_t *array,uint16_t size)
+{
+    uint16_t max=0;
+    uint16_t min=65535;
+    for(uint16_t i=0;i<size;i++)
+    {
+        if(array[i]>max) max=array[i];
+        if(array[i]<min) min=array[i];
+    }
+    
+    return max-min;
+}
 
 void range_adjust()
 {
-    // float vpp=3.3*peak_to_peak_calc(gADC1_Samples,1024)/4096;
-    float vpp;
+    float vpp=3.3*find_vpp(gADC1_Samples, 1024)/4096;
+    // float vpp;
     switch (current_range) {
+        case 0:
+            if(vpp>3.2) current_range=1;
+            // if(vpp<15) current_range=2;
+            break;
         case 1:
-            if(vpp>15) current_range=2;
-            if(vpp<15) current_range=2;
+            if(vpp>3.2) current_range=2;
+            if(vpp<0.5) current_range=0;
             break;
         case 2:
-            if(vpp>15) current_range=2;
-            if(vpp<15) current_range=2;
-            break;
-        case 3:
-            if(vpp<15) current_range=2;
+            if(vpp<0.5) current_range=1;
             break;
     }
 
     //call range adjust functions here
-    external_gain_adjust(0);
+    external_gain_adjust(current_range);
     
 }
 
@@ -320,12 +343,15 @@ void adc_data_opt()
         // opa_gain_adjust();
 
         delay_cycles(CPUCLK_FREQ/2);
+        // delay_cycles(CPUCLK_FREQ*1);
     // } while (opa_gain_not_met);
     adc_data_sort();
-    curr_ori_rms_calc();
-    volt_ori_rms_calc(); 
+    // curr_ori_rms_calc();
+    // volt_ori_rms_calc(); 
     adc_data_calc_input();
     fft_proc(curr);
+
+    uprintf("vol_rms:%.3f, curr_rms:%.3f, AP:%.3f, PF:%.3f ",volt_rms,curr_rms,AP,PF);
 }
 
 void ADC12_0_INST_IRQHandler(void)
@@ -375,4 +401,20 @@ void GROUP1_IRQHandler(void)
         default:
             break;
     }
+}
+
+void uprintf(char *fmt, ...)
+{
+    char buf[256];
+    va_list ap;
+    va_start(ap,fmt);
+    vsprintf(buf,fmt,ap);
+    va_end(ap);
+
+    char * p=buf;
+    while (*p) {
+        DL_UART_Main_transmitDataBlocking(UART_0_INST, *p);
+        p++;
+    }
+
 }

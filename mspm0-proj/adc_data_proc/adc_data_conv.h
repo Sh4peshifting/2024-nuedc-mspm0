@@ -6,6 +6,9 @@
 #include "fft.h"
 #include "quick_sort.h"
 
+#include "stdio.h"
+#include "stdarg.h"
+
 #define RESULT_SIZE (1024)
 #define VOLT_COEF (586.802/2)
 #define CURR_COEF (6/2)
@@ -20,5 +23,6 @@ void adc_dma_init();
 
 void adc_data_opt();
 uint16_t peak_to_peak_calc(uint16_t* array, uint16_t size);
+void uprintf(char *fmt, ...);
 
 #endif
