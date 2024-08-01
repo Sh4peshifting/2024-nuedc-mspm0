@@ -24,6 +24,8 @@ const SPI1          = SPI.addInstance();
 const SYSCTL        = scripting.addModule("/ti/driverlib/SYSCTL");
 const TIMER         = scripting.addModule("/ti/driverlib/TIMER", {}, false);
 const TIMER1        = TIMER.addInstance();
+const UART          = scripting.addModule("/ti/driverlib/UART", {}, false);
+const UART1         = UART.addInstance();
 const ProjectConfig = scripting.addModule("/ti/project_config/ProjectConfig");
 
 /**
@@ -39,7 +41,7 @@ const mux4       = system.clockTree["EXHFMUX"];
 mux4.inputSelect = "EXHFMUX_XTAL";
 
 const mux8       = system.clockTree["HSCLKMUX"];
-mux8.inputSelect = "HSCLKMUX_SYSPLL2X";
+mux8.inputSelect = "HSCLKMUX_HFCLK";
 
 const mux12       = system.clockTree["SYSPLLMUX"];
 mux12.inputSelect = "zSYSPLLMUX_HFCLK";
@@ -116,12 +118,12 @@ GPIO1.associatedPins[0].assignedPin      = "21";
 GPIO1.associatedPins[0].internalResistor = "PULL_UP";
 
 GPIO2.$name                         = "GPIO_GAIN_SW";
-GPIO2.port                          = "PORTA";
+GPIO2.port                          = "PORTB";
 GPIO2.associatedPins.create(2);
 GPIO2.associatedPins[0].$name       = "PIN_0";
-GPIO2.associatedPins[0].pin.$assign = "PA11";
+GPIO2.associatedPins[0].pin.$assign = "PB0";
 GPIO2.associatedPins[1].$name       = "PIN_1";
-GPIO2.associatedPins[1].pin.$assign = "PA12";
+GPIO2.associatedPins[1].pin.$assign = "PB6";
 
 OPA1.$name                        = "OPA_0";
 OPA1.cfg0PSELChannel              = "IN0_POS";
@@ -167,6 +169,14 @@ TIMER1.timerPeriod                 = "100 us";
 TIMER1.interrupts                  = ["ZERO"];
 TIMER1.peripheral.$assign          = "TIMG0";
 
+UART1.$name                    = "UART_0";
+UART1.targetBaudRate           = 115200;
+UART1.peripheral.$assign       = "UART0";
+UART1.peripheral.rxPin.$assign = "PA11";
+UART1.peripheral.txPin.$assign = "PA10";
+UART1.txPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric7";
+UART1.rxPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric9";
+
 ProjectConfig.genLibCMSIS = true;
 
 /**
@@ -184,7 +194,7 @@ Board.peripheral.swclkPin.$suggestSolution         = "PA20";
 Board.peripheral.swdioPin.$suggestSolution         = "PA19";
 GPIO1.associatedPins[0].pin.$suggestSolution       = "PB21";
 SPI1.peripheral.$suggestSolution                   = "SPI0";
-SPI1.peripheral.sclkPin.$suggestSolution           = "PB18";
+SPI1.peripheral.sclkPin.$suggestSolution           = "PA12";
 SPI1.peripheral.mosiPin.$suggestSolution           = "PA14";
-SPI1.peripheral.misoPin.$suggestSolution           = "PA10";
+SPI1.peripheral.misoPin.$suggestSolution           = "PA13";
 SPI1.peripheral.cs3Pin.$suggestSolution            = "PA23";
