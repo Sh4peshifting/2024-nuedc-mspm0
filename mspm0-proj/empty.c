@@ -36,6 +36,7 @@
 #include "timer.h"
 #include "screen_driver.h"
 
+extern uint8_t page;
 
 int main(void)
 {
@@ -50,8 +51,12 @@ int main(void)
     while (1) {
         // adc_data_opt();
         // while (DL_GPIO_readPins(GPIO_SWITCHES_PORT, GPIO_SWITCHES_USER_SWITCH_1_PIN));
-        disp();
-        delay_cycles(CPUCLK_FREQ);
-            
+        disp_proc();
+        
+        delay_cycles(CPUCLK_FREQ*2);
+        page++;
+        if (page == 2) {
+            page = 0;
+        }    
     }
 }

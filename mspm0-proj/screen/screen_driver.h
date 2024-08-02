@@ -17,10 +17,10 @@
                           else  \
                             DL_GPIO_setPins(SPI_RST_PORT, SPI_RST_PIN)
 
+#define CLR_SCREEN display(0x00, 0x00)
 
+void delay_ms(uint16_t ms);
 void screen_init(void);
-void disp_HZ16(uint8_t uc_RowNo, uint8_t uc_ColNo, uint8_t uc_HZCode);
-void disp_HZ16str(uint8_t uc_RowNo, uint8_t uc_ColNo, uint8_t *HZinf, uint8_t uc_HZCnt);
-void disp();
+void disp_str_ascii(uint8_t uc_RowNo, uint8_t uc_ColNo, uint8_t *ptr, uint8_t uc_Cnt);
 
 #endif
