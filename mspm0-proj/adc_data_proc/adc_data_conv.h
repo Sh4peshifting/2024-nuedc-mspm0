@@ -12,7 +12,7 @@
 #define RESULT_SIZE (1024)
 #define VOLT_COEF (586.802/2)
 #define CURR_COEF (6/2)
-#define COIL_N (1)
+#define COIL_N coil_n
 
 #define HIGHMARGIN 0.75 
 #define LOWMARGIN  0.25 

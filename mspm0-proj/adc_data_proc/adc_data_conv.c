@@ -41,7 +41,7 @@ float gain_coef[]={
     4.0458
 };
 
-uint8_t coil_n, coli_n_set;
+uint8_t coil_n = 1, coli_n_set = 1;
 
 // uint16_t peak_to_peak_calc(uint16_t* array, uint16_t size)
 // {
@@ -411,9 +411,11 @@ void button_proc()
     }
     if ((gpioB & BUTTON_BTN2_PIN) ==
         BUTTON_BTN2_PIN) {
+        if (page == 1){
             harm_page++;
             if (harm_page == 3) 
                 harm_page = 0;
+        }
         DL_GPIO_clearInterruptStatus(GPIOB, BUTTON_BTN2_PIN);
     }
     if ((gpioB & BUTTON_BTN3_PIN) ==
