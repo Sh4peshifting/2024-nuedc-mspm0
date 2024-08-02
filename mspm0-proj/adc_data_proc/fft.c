@@ -363,7 +363,7 @@ float find_max(float *array,uint16_t start,uint16_t end)
             max_index=i;
         }
     }
-    return max_value;
+    return max_value+array[max_index-1]+array[max_index+1];
 }
 
 uint16_t find_max_index(float *array,uint16_t start,uint16_t end)
@@ -415,9 +415,9 @@ void fft_proc(float *input_signal)
     arm_cmplx_mag_f32(input_cmplx,volt,1024);
 
     uint16_t base_wave_index=find_max_index(volt,3,20);
-    harmonic[1]=find_max(volt,3,20)/512;
-    for(uint16_t i=2;i<16;i++){
-       harmonic[i]= find_max(volt, base_wave_index*i-3, base_wave_index*i+3) / 512;
+    // harmonic[1]=find_max(volt,3,20)/512/1.41421;
+    for(uint16_t i=1;i<16;i++){
+       harmonic[i]= find_max(volt, base_wave_index*i-3, base_wave_index*i+3) / 512 /1.41421;
     }
     curr_thd_calc();
 }
