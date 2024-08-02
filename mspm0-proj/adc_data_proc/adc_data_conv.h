@@ -10,7 +10,7 @@
 #include "stdarg.h"
 
 #define RESULT_SIZE (1024)
-#define VOLT_COEF (586.802/2)
+#define VOLT_COEF (586.802)
 #define CURR_COEF (6/2)
 #define COIL_N coil_n
 

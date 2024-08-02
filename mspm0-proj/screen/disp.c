@@ -36,26 +36,36 @@ void disp_thd()
     switch (harm_page) {
         case 0:
             disp_printf(0, 0, 16, "THD=%.1f%%", curr_thd*100);
-            disp_printf(1, 0, 16, "2nd:%.3fA", harmonic[2]);
-            disp_printf(2, 0, 16, "3th:%.3fA", harmonic[3]);
-            disp_printf(3, 0, 16, "4th:%.3fA", harmonic[4]);
+            disp_printf(1, 0, 16, "1st:%.3fA", harmonic[1]);
+            disp_printf(2, 0, 16, "2nd:%.3fA", harmonic[2]);
+            disp_printf(3, 0, 16, "3th:%.3fA", harmonic[3]);
+            
         break;
         case 1:
-            disp_printf(0, 0, 16, "5th:%.3fA", harmonic[5]);
-            disp_printf(1, 0, 16, "6th:%.3fA", harmonic[6]);
-            disp_printf(2, 0, 16, "7th:%.3fA", harmonic[7]);
-            disp_printf(3, 0, 16, "8th:%.3fA", harmonic[8]);
+            disp_printf(0, 0, 16, "4th:%.3fA", harmonic[4]);
+            disp_printf(1, 0, 16, "5th:%.3fA", harmonic[5]);
+            disp_printf(2, 0, 16, "6th:%.3fA", harmonic[6]);
+            disp_printf(3, 0, 16, "7th:%.3fA", harmonic[7]);
+            
         break;
         case 2:
-            disp_printf(0, 0, 16, "9th:%.3fA", harmonic[9]);
-            disp_printf(1, 0, 16, "10th:%.3fA", harmonic[10]);
-            disp_printf(2, 0, 16, "11th:%.3fA", harmonic[11]);
-            disp_printf(3, 0, 16, "12th:%.3fA", harmonic[12]);
+            disp_printf(0, 0, 16, "8th:%.3fA", harmonic[8]);
+            disp_printf(1, 0, 16, "9th:%.3fA", harmonic[9]);
+            disp_printf(2, 0, 16, "10th:%.3fA", harmonic[10]);
+            disp_printf(3, 0, 16, "11th:%.3fA", harmonic[11]);
+        break;
+        case 3:
+            disp_printf(0, 0, 16, "8th:%.3fA", harmonic[12]);
+            disp_printf(1, 0, 16, "9th:%.3fA", harmonic[13]);
+            disp_printf(2, 0, 16, "10th:%.3fA", harmonic[14]);
+            disp_printf(3, 0, 16, "11th:%.3fA", harmonic[15]);
         break;
         
     }
 }
 
+extern uint8_t coil_n ;
+extern uint8_t coli_n_set;
 void disp_proc()
 {
     uint8_t str[16]={0};
@@ -81,7 +91,10 @@ void disp_proc()
             // disp_str_ascii(0, 0, str, 16);
         break;
         case 2:
-            
+            disp_printf(0, 0, 16, "Coil_N:%d", coli_n_set);
+            disp_printf(1, 0, 16, " ");
+            disp_printf(2, 0, 16, " ");
+            disp_printf(3, 0, 16, " ");
 
         break;
     

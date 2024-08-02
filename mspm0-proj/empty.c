@@ -47,7 +47,7 @@ int main(void)
     adc_dma_init();
 
     NVIC_EnableIRQ(BUTTON_GPIOA_INT_IRQN);
-    NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOB_INT_IRQN);
+    NVIC_EnableIRQ(BUTTON_GPIOB_INT_IRQN);
 
     DL_COMP_enable(COMP_0_INST);
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);

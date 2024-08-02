@@ -36,7 +36,7 @@ volatile uint8_t opa_gain_not_met;
 uint8_t current_range;
 
 float gain_coef[]={
-    0.18769,
+    1,
     1.11307,
     4.0458
 };
@@ -234,38 +234,38 @@ static void curr_ori_rms_calc()
 }
 
 
-uint32_t Gain;
+// uint32_t Gain;
 
-static void opa_gain_adjust()
-{
-    Gain = DL_OPA_getGain(OPA_1_INST);
-    uint32_t tempGain = 0;
-    if (curr_ori_rms > HIGHMARGIN) {
-        tempGain = DL_OPA_getGain(OPA_1_INST);
-        opa_gain_not_met = 1;
-        if(tempGain > MINGAIN){
-            DL_OPA_decreaseGain(OPA_1_INST);
-        }
-        else {
-            opa_gain_not_met = 0;
-        }
+// static void opa_gain_adjust()
+// {
+//     Gain = DL_OPA_getGain(OPA_1_INST);
+//     uint32_t tempGain = 0;
+//     if (curr_ori_rms > HIGHMARGIN) {
+//         tempGain = DL_OPA_getGain(OPA_1_INST);
+//         opa_gain_not_met = 1;
+//         if(tempGain > MINGAIN){
+//             DL_OPA_decreaseGain(OPA_1_INST);
+//         }
+//         else {
+//             opa_gain_not_met = 0;
+//         }
         
-    }
-    else if (curr_ori_rms < LOWMARGIN) {
-        tempGain = DL_OPA_getGain(OPA_1_INST);
-        opa_gain_not_met = 1;
-        if(tempGain < MAXGAIN){
-           DL_OPA_increaseGain(OPA_1_INST);
-        }
-        else {
-            opa_gain_not_met = 0;
-        }
+//     }
+//     else if (curr_ori_rms < LOWMARGIN) {
+//         tempGain = DL_OPA_getGain(OPA_1_INST);
+//         opa_gain_not_met = 1;
+//         if(tempGain < MAXGAIN){
+//            DL_OPA_increaseGain(OPA_1_INST);
+//         }
+//         else {
+//             opa_gain_not_met = 0;
+//         }
         
-    }
-    else {
-        opa_gain_not_met = 0;
-    }
-}
+//     }
+//     else {
+//         opa_gain_not_met = 0;
+//     }
+// }
 
 
 void external_gain_adjust(uint8_t gain_mode)
@@ -353,7 +353,7 @@ void adc_data_opt()
     adc_data_calc_input();
     fft_proc(curr);
 
-    uprintf("vol_rms:%.3f, curr_rms:%.3f, AP:%.3f, PF:%.3f ",volt_rms,curr_rms,AP,PF);
+    // uprintf("vol_rms:%.3f, curr_rms:%.3f, AP:%.3f, PF:%.3f ",volt_rms,curr_rms,AP,PF);
 }
 
 void ADC12_0_INST_IRQHandler(void)
@@ -385,50 +385,47 @@ extern uint8_t harm_page;
 void button_proc()
 { 
     uint32_t gpioA = DL_GPIO_getEnabledInterruptStatus(GPIOA, BUTTON_BTN1_PIN);
-    if ((gpioA & BUTTON_BTN1_PIN) ==
-        BUTTON_BTN1_PIN) {
-            page++;
-            if (page == 2) 
-                page = 0;
-
+    if ((gpioA & BUTTON_BTN1_PIN) == BUTTON_BTN1_PIN) {
+        page++;
+        if (page == 3){
+            page = 0;
+            harm_page = 0;
+            coil_n = coli_n_set;
+        }
         DL_GPIO_clearInterruptStatus(GPIOA, BUTTON_BTN1_PIN);
     }
 
-
     uint32_t gpioB = DL_GPIO_getEnabledInterruptStatus(
-        GPIOB, GPIO_SWITCHES_USER_SWITCH_1_PIN | BUTTON_BTN2_PIN | 
-        BUTTON_BTN3_PIN | BUTTON_BTN4_PIN);
+        GPIOB, BUTTON_BTN2_PIN | BUTTON_BTN3_PIN | BUTTON_BTN4_PIN);
 
-    if ((gpioB & GPIO_SWITCHES_USER_SWITCH_1_PIN) ==
-        GPIO_SWITCHES_USER_SWITCH_1_PIN) {
-
-            page++;
-            if (page == 2) {
-                page = 0;
-        } 
-
-        DL_GPIO_clearInterruptStatus(GPIOB, GPIO_SWITCHES_USER_SWITCH_1_PIN);
-    }
-    if ((gpioB & BUTTON_BTN2_PIN) ==
-        BUTTON_BTN2_PIN) {
-        if (page == 1){
+    if ((gpioB & BUTTON_BTN2_PIN) == BUTTON_BTN2_PIN) {
+        if (page == 1) {
             harm_page++;
-            if (harm_page == 3) 
-                harm_page = 0;
+        if (harm_page == 4)
+          harm_page = 0;
         }
         DL_GPIO_clearInterruptStatus(GPIOB, BUTTON_BTN2_PIN);
     }
-    if ((gpioB & BUTTON_BTN3_PIN) ==
-        BUTTON_BTN3_PIN) {
+    if ((gpioB & BUTTON_BTN3_PIN) == BUTTON_BTN3_PIN) {
+        if (page == 2) {
+            coli_n_set++;
+            if (coli_n_set > 10) {
+                coli_n_set = 10;
+            }
+        }
 
         DL_GPIO_clearInterruptStatus(GPIOB, BUTTON_BTN3_PIN);
     }
-    if ((gpioB & BUTTON_BTN4_PIN) ==
-        BUTTON_BTN4_PIN) {
+    if ((gpioB & BUTTON_BTN4_PIN) == BUTTON_BTN4_PIN) {
+        if (page == 2) {
+            if (coli_n_set > 1) {
+                coli_n_set--;
+            }
+        }
+        
 
         DL_GPIO_clearInterruptStatus(GPIOB, BUTTON_BTN4_PIN);
     }
-    
 }
 
 void GROUP1_IRQHandler(void)
@@ -458,18 +455,18 @@ void GROUP1_IRQHandler(void)
     button_proc();
 }
 
-void uprintf(char *fmt, ...)
-{
-    char buf[256];
-    va_list ap;
-    va_start(ap,fmt);
-    vsprintf(buf,fmt,ap);
-    va_end(ap);
+// void uprintf(char *fmt, ...)
+// {
+//     char buf[256];
+//     va_list ap;
+//     va_start(ap,fmt);
+//     vsprintf(buf,fmt,ap);
+//     va_end(ap);
 
-    char * p=buf;
-    while (*p) {
-        DL_UART_Main_transmitDataBlocking(UART_0_INST, *p);
-        p++;
-    }
+//     char * p=buf;
+//     while (*p) {
+//         DL_UART_Main_transmitDataBlocking(UART_0_INST, *p);
+//         p++;
+//     }
 
-}
+// }
