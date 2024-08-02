@@ -41,6 +41,8 @@ float gain_coef[]={
     4.0458
 };
 
+uint8_t coil_n, coli_n_set;
+
 // uint16_t peak_to_peak_calc(uint16_t* array, uint16_t size)
 // {
 //     uint16_t array_temp[size];
@@ -377,6 +379,89 @@ void ADC12_1_INST_IRQHandler(void)
             break;
     }
 }
+
+extern uint8_t page;
+void button_proc()
+{
+    // switch (DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1)) {
+    //     case BUTTON_BTN1_IIDX:
+    //         if (!DL_GPIO_readPins(BUTTON_BTN1_PORT, BUTTON_BTN1_PIN)) {
+    //             page++;
+    //             if (page == 2) {
+    //                 page = 0;
+    //             } 
+    //         }
+    //         break;
+    //     case BUTTON_BTN2_IIDX:
+    //         if (!DL_GPIO_readPins(BUTTON_BTN2_PORT, BUTTON_BTN2_PIN)) {
+
+    //         }
+    //         break;
+    //     case BUTTON_BTN3_IIDX:
+    //         if (!DL_GPIO_readPins(BUTTON_BTN3_PORT, BUTTON_BTN3_PIN)) {
+ 
+    //         }
+    //         break;
+    //     case BUTTON_BTN4_IIDX:
+    //         if (!DL_GPIO_readPins(BUTTON_BTN4_PORT, BUTTON_BTN4_PIN)) {
+
+    //         }
+    //         break;
+
+    //     case GPIO_SWITCHES_USER_SWITCH_1_IIDX:
+    //         if (!DL_GPIO_readPins(GPIO_SWITCHES_PORT, GPIO_SWITCHES_USER_SWITCH_1_PIN)) {
+    //             page++;
+    //             if (page == 2) {
+    //                 page = 0;
+    //             } 
+    //         }
+    //         break;
+    // }
+    
+
+    uint32_t gpioA = DL_GPIO_getEnabledInterruptStatus(GPIOA, BUTTON_BTN1_PIN);
+
+
+    if ((gpioA & BUTTON_BTN1_PIN) ==
+        BUTTON_BTN1_PIN) {
+
+
+        DL_GPIO_clearInterruptStatus(GPIOA, BUTTON_BTN1_PIN);
+    }
+
+
+    uint32_t gpioB = DL_GPIO_getEnabledInterruptStatus(
+        GPIOB, GPIO_SWITCHES_USER_SWITCH_1_PIN | BUTTON_BTN2_PIN | 
+        BUTTON_BTN3_PIN | BUTTON_BTN4_PIN);
+
+    if ((gpioB & GPIO_SWITCHES_USER_SWITCH_1_PIN) ==
+        GPIO_SWITCHES_USER_SWITCH_1_PIN) {
+
+                    page++;
+        if (page == 2) {
+            page = 0;
+        } 
+
+        DL_GPIO_clearInterruptStatus(GPIOB, GPIO_SWITCHES_USER_SWITCH_1_PIN);
+    }
+    if ((gpioB & BUTTON_BTN2_PIN) ==
+        BUTTON_BTN2_PIN) {
+
+        DL_GPIO_clearInterruptStatus(GPIOB, BUTTON_BTN2_PIN);
+    }
+    if ((gpioB & BUTTON_BTN3_PIN) ==
+        BUTTON_BTN3_PIN) {
+
+        DL_GPIO_clearInterruptStatus(GPIOB, BUTTON_BTN3_PIN);
+    }
+    if ((gpioB & BUTTON_BTN4_PIN) ==
+        BUTTON_BTN4_PIN) {
+
+        DL_GPIO_clearInterruptStatus(GPIOB, BUTTON_BTN4_PIN);
+    }
+    
+}
+
 void GROUP1_IRQHandler(void)
 {
     switch (DL_COMP_getPendingInterrupt(COMP_0_INST)) {
@@ -401,6 +486,7 @@ void GROUP1_IRQHandler(void)
         default:
             break;
     }
+    button_proc();
 }
 
 void uprintf(char *fmt, ...)

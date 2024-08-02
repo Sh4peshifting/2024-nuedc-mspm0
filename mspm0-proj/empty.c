@@ -38,25 +38,26 @@
 
 extern uint8_t page;
 
+
 int main(void)
 {
     SYSCFG_DL_init();
     DL_SYSCTL_setPowerPolicyRUN0SLEEP0();
 
     adc_dma_init();
+
+    NVIC_EnableIRQ(BUTTON_GPIOA_INT_IRQN);
+    NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOB_INT_IRQN);
+
     DL_COMP_enable(COMP_0_INST);
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
     
     screen_init();
     while (1) {
-        // adc_data_opt();
+        adc_data_opt();
         // while (DL_GPIO_readPins(GPIO_SWITCHES_PORT, GPIO_SWITCHES_USER_SWITCH_1_PIN));
         disp_proc();
         
-        delay_cycles(CPUCLK_FREQ*2);
-        page++;
-        if (page == 2) {
-            page = 0;
-        }    
+   
     }
 }

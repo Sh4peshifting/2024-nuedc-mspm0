@@ -33,13 +33,12 @@ void disp_printf(uint8_t disp_row, uint8_t disp_col, uint8_t disp_length, char *
 void disp_proc()
 {
     uint8_t str[16]={0};
-    CLR_SCREEN;
     switch (page) {
         case 0:
-            disp_printf(0, 0, 16, "Urms=%.2fV", volt_disp);
+            disp_printf(0, 0, 16, "Urms=%.2fV", volt_rms);
             disp_printf(1, 0, 16, "Irms=%.3fA", curr_rms);
-            disp_printf(2, 0, 16, "P=%.3fW", power_disp);
-            disp_printf(3, 0, 16, "PF=%.3f", pf_disp);
+            disp_printf(2, 0, 16, "P=%.3fW", AP);
+            disp_printf(3, 0, 16, "PF=%.3f", PF);
             // snprintf(str, 16,"Urms=%.3f       ", volt_disp);
             // disp_str_ascii(0, 0, str, 16);
             // snprintf(str, 16, "Irms=%.3f       ", curr_rms);
@@ -51,12 +50,15 @@ void disp_proc()
 
         break;
         case 1:
-            disp_printf(0, 0, 16, "THD=%.3f%%", thd_disp);
+            disp_printf(0, 0, 16, "THD=%.1f%%", curr_thd*100);
+            disp_printf(1, 0, 16, " ");
+            disp_printf(2, 0, 16, " ");
+            disp_printf(3, 0, 16, " ");
             // snprintf(str, 16, "THD=%.3f       ", thd_disp);
             // disp_str_ascii(0, 0, str, 16);
         break;
         case 2:
-
+            
 
         break;
     
