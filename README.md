@@ -1,37 +1,4 @@
 # 2024NUEDC-MSPM0
 
 #### 介绍
-2024年TI杯电子设计大赛工程
-
-#### 软件架构
-软件架构说明
-
-
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+本设计基于LP-MSPM0G3507 设计了单相功率分析仪。该系统通过电流互感器和电压互感器实现对用电插座上负载的电流和电压的测量，系统利用MSPM0内部的程控放大器对信号进行放大， ADC 进行采集， DMA 传输数据，计算实际的电压、电流。通过内置比较器检测信号的过零点，并通过一个周期的积分计算平均值以得出有功功率。同时，系统通过计算电压和电流的均方根值获得视在功率，并进一步计算功率因数。设计使用FFT，用于计算电流谐波系数以及2至10次谐波的有效值。设计与PA测量相对误差绝对值低。
